@@ -2,34 +2,66 @@ var express = require('express');
 var router = express.Router();
 var userModule = require('../modules/user')
 var bcrypt = require('bcryptjs');
+var jwt = require('jsonwebtoken');
+
+if (typeof localStorage === "undefined" || localStorage === null) {
+  var LocalStorage = require('node-localstorage').LocalStorage;
+  localStorage = new LocalStorage('./scratch');
+}
+
+function checkloginuser(req, res, next) {
+  var userToken = localStorage.getItem('userToken');
+  try {
+    var decoded = jwt.verify(userToken, 'loginToken')
+  } catch (error) {
+    res.redirect('/');
+  }
+  next();
+}
+
+
 /* GET home page. */
 router.get('/', function (req, res, next) {
-  res.render('index', { title: 'Password Management System', msg: '' });
+  var loginUser = localStorage.getItem('loginUser');
+  if (loginUser) {
+    res.redirect('/dashboard')
+  }
+  else {
+    res.render('index', { title: 'Password Management System', msg: '' });
+  }
 });
 
 router.post('/', async function (req, res, next) {
-  var username = req.body.uname;
-  var password = req.body.password;
+  const { uname: username, password } = req.body;
+
+  console.log(`Received username: ${username} and password: ${password}`);
 
   try {
-    const checkUser = await userModule.findOne({ username: username });
-    if (checkUser) {
-      var getPassword = checkUser.password;
-      if (bcrypt.compareSync(password, getPassword)) {
-        req.session.username = username;
-        res.redirect('/password_category');
+    const user = await userModule.findOne({ username }).exec();
+    console.log(`Found user: ${user}`);
+
+    if (user) {
+      var getUserId = user._id
+      const isValidPassword = bcrypt.compareSync(password, user.password);
+      var token = jwt.sign({ userId: getUserId }, "loginToken");
+      localStorage.setItem('userToken', token);
+      localStorage.setItem('loginUser', username);
+      console.log(`Password comparison result: ${isValidPassword}`);
+
+      if (isValidPassword) {
+        res.redirect('/dashboard');
       } else {
         res.render('index', { title: 'Password Management System', msg: 'Invalid Password' });
       }
     } else {
-      res.render('index', { title: 'Password Management System', msg: 'Invalid User Name' });
+      console.log('User not found');
+      res.render('index', { title: 'Password Management System', msg: 'User not found' });
     }
   } catch (err) {
-    console.error(err);
+    console.error('Error occurred:', err);
     res.render('index', { title: 'Password Management System', msg: 'Error occurred' });
   }
 });
-
 
 
 async function checkEmail(req, res, email) {
@@ -56,9 +88,23 @@ async function checkuname(req, res, username) {
     console.error(err);
   }
 }
+router.get('/logout', function (req, res, next) {
+  localStorage.removeItem('userToken');
+  localStorage.removeItem('loginUser');
+  res.redirect('/');
+});
+router.get('/dashboard', checkloginuser, function (req, res, next) {
+  var loginUser = localStorage.getItem('loginUser');
+  res.render('dashboard', { title: 'Password Management System', loginUser: loginUser, msg: '' });
+});
 
 router.get('/signup', function (req, res, next) {
-  res.render('signup', { title: 'Password Management System', msg: '' });
+  var loginUser = localStorage.getItem('loginUser');
+  if (loginUser) {
+    res.redirect('/dashboard')
+  } else {
+    res.render('signup', { title: 'Password Management System', msg: '' });
+  }
 });
 
 router.post('/signup', async function (req, res, next) {
@@ -93,19 +139,29 @@ router.post('/signup', async function (req, res, next) {
 
 
 
-router.get('/password_category', function (req, res, next) {
-  res.render('password_category', { title: 'Password Management System', msg: 'Log In Successfully' });
+
+
+router.get('/password_category', checkloginuser, function (req, res, next) {
+  var loginUser = localStorage.getItem('loginUser');
+
+  res.render('password_category', { title: 'Password Management System', loginUser: loginUser, msg: 'Log In Successfully' });
 });
 
-router.get('/addNewCategory', function (req, res, next) {
-  res.render('addNewCategory', { title: 'Password Management System' });
+router.get('/addNewCategory', checkloginuser, function (req, res, next) {
+  var loginUser = localStorage.getItem('loginUser');
+
+  res.render('addNewCategory', { title: 'Password Management System', loginUser: loginUser });
 });
 
-router.get('/addNewPassword', function (req, res, next) {
-  res.render('addNewPassword', { title: 'Password Management System' });
+router.get('/addNewPassword', checkloginuser, function (req, res, next) {
+  var loginUser = localStorage.getItem('loginUser');
+
+  res.render('addNewPassword', { title: 'Password Management System', loginUser: loginUser });
 });
 
-router.get('/viewAllPassword', function (req, res, next) {
-  res.render('viewAllPassword', { title: 'Password Management System' });
+router.get('/viewAllPassword', checkloginuser, function (req, res, next) {
+  var loginUser = localStorage.getItem('loginUser');
+
+  res.render('viewAllPassword', { title: 'Password Management System', loginUser: loginUser });
 });
 module.exports = router;
