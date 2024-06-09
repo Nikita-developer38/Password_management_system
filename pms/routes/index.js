@@ -3,7 +3,9 @@ var router = express.Router();
 var userModule = require('../modules/user')
 var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
-
+var { check, validationResult } = require('express-validator');
+var passCatModel = require('../modules/password_category');
+var getPasscat = passCatModel.find({});
 if (typeof localStorage === "undefined" || localStorage === null) {
   var LocalStorage = require('node-localstorage').LocalStorage;
   localStorage = new LocalStorage('./scratch');
@@ -143,15 +145,45 @@ router.post('/signup', async function (req, res, next) {
 
 router.get('/password_category', checkloginuser, function (req, res, next) {
   var loginUser = localStorage.getItem('loginUser');
+  try {
+    getPasscat.exec();
+    res.render('password_category', { title: 'Password Management System', loginUser: loginUser, msg: 'Log In Successfully', records: data });
 
-  res.render('password_category', { title: 'Password Management System', loginUser: loginUser, msg: 'Log In Successfully' });
+  } catch (err) {
+    console.error(err);
+  }
 });
 
 router.get('/addNewCategory', checkloginuser, function (req, res, next) {
   var loginUser = localStorage.getItem('loginUser');
 
-  res.render('addNewCategory', { title: 'Password Management System', loginUser: loginUser });
+
+  res.render('addNewCategory', { title: 'Password Management System', loginUser: loginUser, errors: '', success: '' });
+
 });
+router.post('/addNewCategory', checkloginuser, [check('passwordCategory', 'Enter Password Category Name').isLength({ min: 1 })], function (req, res, next) {
+  var loginUser = localStorage.getItem('loginUser');
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    res.render('addNewCategory', { title: 'Password Management System', loginUser: loginUser, errors: errors.mapped(), success: '' });
+
+  } else {
+    var passCatName = req.body.passwordCategory;
+    var passCatDetails = new passCatModel({
+      password_category: passCatName
+    })
+    try {
+      passCatDetails.save((err, data) => {
+        res.render('addNewCategory', { title: 'Password Management System', loginUser: loginUser, errors: '', success: 'password Category Added Successfully', records: data });
+
+      });
+
+    } catch (err) {
+      // res.redirect('addNewCategory', { title: 'Password Managemnt System', loginUser: loginUser, errors: '', success: '' });
+    }
+  }
+});
+
 
 router.get('/addNewPassword', checkloginuser, function (req, res, next) {
   var loginUser = localStorage.getItem('loginUser');

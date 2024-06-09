@@ -56,22 +56,36 @@
             </div>
         </div>
     </nav>
-    <form>
-        <div class="form-group row">
-            <label for="username" class="col-lg-2 col-form-label">New Category Name</label>
-            <div class="col-lg-10">
-                <input type="text" class="form-control form-control-lg" id="inputName"
-                    placeholder="Enter your New Category">
+    <form action="addNewCategory" method="post">
+        <% if(errors !='' ) { %>
+            <div>
+                <p style="text-align: center; color: crimson; font-weight: 600;">
+                    <%= errors.passwordCategory.msg %>
+                </p>
             </div>
-        </div>
+            <% } %>
+                <% if(success !='' ) { %>
+                    <div>
+                        <p style="text-align: center; color: rgb(14, 243, 26); font-weight: 600;">
+                            <%= success %>
+                        </p>
+                    </div>
+                    <% } %>
+                        <div class="form-group row">
+                            <label for="username" class="col-lg-2 col-form-label">New Category Name</label>
+                            <div class="col-lg-10">
+                                <input type="text" class="form-control form-control-lg" id="inputName"
+                                    placeholder="Enter your New Category" name="passwordCategory">
+                            </div>
+                        </div>
 
 
-        <div class="form-group row">
-            <div class="col-sm-10 offset-sm-2">
-                <button type="submit" value="Add Category" class="btn btn-primary">Add Category</button>
-            </div>
-        </div>
-        <p>You can <a href="/password_category">View all Category List</a></p>
+                        <div class="form-group row">
+                            <div class="col-sm-10 offset-sm-2">
+                                <button type="submit" value="Add Category" class="btn btn-primary">Add Category</button>
+                            </div>
+                        </div>
+                        <p>You can <a href="/password_category">View all Category List</a></p>
     </form>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
