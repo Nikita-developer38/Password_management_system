@@ -7,10 +7,12 @@
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
+    "ckeditor5": "^41.4.2",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "ejs": "~2.6.1",
     "express": "~4.16.1",
+    "express-session": "^1.18.0",
     "express-validator": "^7.1.0",
     "http-errors": "~1.6.3",
     "jsonwebtoken": "^9.0.2",

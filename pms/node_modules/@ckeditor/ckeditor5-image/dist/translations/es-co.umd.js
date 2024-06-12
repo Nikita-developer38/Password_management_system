@@ -1,0 +1,11 @@
+/**
+ * @license Copyright (c) 2003-2024, CKSource Holding sp. z o.o. All rights reserved.
+ * For licensing, see LICENSE.md or https://ckeditor.com/legal/ckeditor-oss-license
+ */
+
+( e => {
+const { [ 'es-co' ]: { dictionary, getPluralForm } } = {"es-co":{"dictionary":{"image widget":"","Wrap text":"","Break text":"","In line":"","Side image":"","Full size image":"","Left aligned image":"","Centered image":"","Right aligned image":"","Change image text alternative":"","Text alternative":"","Enter image caption":"","Insert image":"","Replace image":"","Upload from computer":"","Replace from computer":"","Upload image from computer":"","Image from computer":"","Replace image from computer":"","Upload failed":"","Image toolbar":"","Resize image":"","Resize image to %0":"","Resize image to the original size":"","Resize image (in %0)":"","Original":"","Custom image size":"","Custom":"","Image resize list":"","Insert":"Insertar","Update":"","Insert image via URL":"","Update image URL":"","Caption for the image":"","Caption for image: %0":"","The value must not be empty.":"","The value should be a plain number.":"","Uploading image":"","Image upload complete":"","Error during image upload":""},getPluralForm(n){return n == 1 ? 0 : n != 0 && n % 1000000 == 0 ? 1 : 2;}}};
+e[ 'es-co' ] ||= { dictionary: {}, getPluralForm: null };
+e[ 'es-co' ].dictionary = Object.assign( e[ 'es-co' ].dictionary, dictionary );
+e[ 'es-co' ].getPluralForm = getPluralForm;
+} )( window.CKEDITOR_TRANSLATIONS ||= {} );

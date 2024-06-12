@@ -5,7 +5,8 @@ var bcrypt = require('bcryptjs');
 var jwt = require('jsonwebtoken');
 var { check, validationResult } = require('express-validator');
 var passCatModel = require('../modules/password_category');
-var getPasscat = passCatModel.find({});
+var addPassModel = require('../modules/add_password');
+//var getPasscat = passCatModel.find({});
 if (typeof localStorage === "undefined" || localStorage === null) {
   var LocalStorage = require('node-localstorage').LocalStorage;
   localStorage = new LocalStorage('./scratch');
@@ -145,13 +146,48 @@ router.post('/signup', async function (req, res, next) {
 
 router.get('/password_category', checkloginuser, function (req, res, next) {
   var loginUser = localStorage.getItem('loginUser');
-  try {
-    getPasscat.exec();
-    res.render('password_category', { title: 'Password Management System', loginUser: loginUser, msg: 'Log In Successfully', records: data });
-
-  } catch (err) {
+  passCatModel.find().exec().then(data => {
+    res.render('password_category', { title: 'password Management System ', loginUser: loginUser, errors: '', success: '', records: data });
+  }).catch(err => {
     console.error(err);
-  }
+    res.status(500).send('Error occurred while fetching categories');
+  });
+});
+router.get('/password_category/delete/:id', checkloginuser, function (req, res, next) {
+  var loginUser = localStorage.getItem('loginUser');
+  var passcat_id = req.params.id;
+  passCatModel.findByIdAndDelete(passcat_id).exec().then(data => {
+    res.redirect('/password_category');
+  }).catch(err => {
+
+    res.status(500).send('Error occurred while deleting category');
+  });
+
+});
+
+router.get('/password_category/edit/:id', checkloginuser, function (req, res, next) {
+  var loginUser = localStorage.getItem('loginUser');
+  var passcat_id = req.params.id;
+  passCatModel.findById(passcat_id).exec().then(data => {
+    res.render('edit_pass_category', { title: 'password Management System ', loginUser: loginUser, errors: '', success: '', records: data, id: passcat_id });
+  }).catch(err => {
+
+    res.status(500).send('Error occurred while deleting category');
+  });
+
+});
+
+router.post('/password_category/edit/', checkloginuser, function (req, res, next) {
+  var loginUser = localStorage.getItem('loginUser');
+  var passcat_id = req.body.id;
+  var passcat_category = req.body.passwordCategory;
+  passCatModel.findByIdAndUpdate(passcat_id, { password_category: passcat_category }).exec().then(data => {
+    res.redirect('/password_category');
+  }).catch(err => {
+
+    res.status(500).send('Error occurred while deleting category');
+  });
+
 });
 
 router.get('/addNewCategory', checkloginuser, function (req, res, next) {
@@ -168,13 +204,15 @@ router.post('/addNewCategory', checkloginuser, [check('passwordCategory', 'Enter
     res.render('addNewCategory', { title: 'Password Management System', loginUser: loginUser, errors: errors.mapped(), success: '' });
 
   } else {
-    var passCatName = req.body.passwordCategory;
-    var passCatDetails = new passCatModel({
-      password_category: passCatName
-    })
+
     try {
-      passCatDetails.save((err, data) => {
-        res.render('addNewCategory', { title: 'Password Management System', loginUser: loginUser, errors: '', success: 'password Category Added Successfully', records: data });
+      var passCatName = req.body.passwordCategory;
+      var passCatDetails = new passCatModel({
+        password_category: passCatName
+      })
+
+      passCatDetails.save().then(result => {
+        res.render('addNewCategory', { title: 'Password Management System', loginUser: loginUser, errors: '', success: 'password Category Added Successfully', records: result });
 
       });
 
@@ -188,12 +226,84 @@ router.post('/addNewCategory', checkloginuser, [check('passwordCategory', 'Enter
 router.get('/addNewPassword', checkloginuser, function (req, res, next) {
   var loginUser = localStorage.getItem('loginUser');
 
-  res.render('addNewPassword', { title: 'Password Management System', loginUser: loginUser });
+  passCatModel.find().exec().then(data => {
+
+    res.render('addNewPassword', { title: 'Password Management System', loginUser: loginUser, records: data, success: '' });
+  }).catch(err => {
+
+    res.status(500).send('Error occurred while deleting category');
+  });
+});
+router.post('/addNewPassword', checkloginuser, function (req, res, next) {
+  var loginUser = localStorage.getItem('loginUser');
+  var pass_cat = req.body.pass_cat;
+  var password_detail = req.body.password_detail;
+  var project_name = req.body.Project_Name;
+  var password_details = new addPassModel({
+    password_category: pass_cat,
+    project_name: project_name,
+    password_Details: password_detail
+  });
+  password_details.save().then(result => {
+    passCatModel.find({}).exec().then(data => {
+      res.render('addNewPassword', { title: 'Password Management System', loginUser: loginUser, records: data, success: "Password Details Recorded Successfully" });
+    })
+  }).catch(err => {
+
+    res.status(500).send('Error occurred while deleting category');
+  });
 });
 
+//your code
 router.get('/viewAllPassword', checkloginuser, function (req, res, next) {
   var loginUser = localStorage.getItem('loginUser');
+  addPassModel.find().exec().then(data => {
+    res.render('viewAllPassword', { title: 'Password Management System', loginUser: loginUser, records: data, success: '', errors: '' });
+  }).catch(err => {
 
-  res.render('viewAllPassword', { title: 'Password Management System', loginUser: loginUser });
+    res.status(500).send('Error occurred while fetching categories');
+  });
+
 });
+
+
+router.get('/viewAllPassword/delete/:id', checkloginuser, function (req, res, next) {
+  var loginUser = localStorage.getItem('loginUser');
+  var passcat_id = req.params.id;
+  addPassModel.findByIdAndDelete(passcat_id).exec().then(data => {
+    res.redirect('/viewAllPassword');
+  }).catch(err => {
+
+    res.status(500).send('Error occurred while deleting category');
+  });
+
+});
+
+router.get('/viewAllPassword/edit/:id', checkloginuser, function (req, res, next) {
+  var loginUser = localStorage.getItem('loginUser');
+  var passcat_id = req.params.id;
+
+  addPassModel.findById(passcat_id).exec().then(data => {
+    res.render('edit_pass_details', { title: 'password Management System ', loginUser: loginUser, errors: '', success: '', records: data, id: passcat_id });
+  }).catch(err => {
+
+    res.status(500).send('Error occurred while deleting category');
+  });
+
+});
+
+router.post('/viewAllPassword/edit/', checkloginuser, function (req, res, next) {
+  var loginUser = localStorage.getItem('loginUser');
+  var passcat_id = req.body.id;
+  var passcat_category = req.body.pass_cat;
+  var passcat_details = req.body.password_detail;
+  passCatModel.findByIdAndUpdate(passcat_id, { password_category: passcat_category }, { password_Details: passcat_details }).exec().then(data => {
+    res.redirect('/viewAllPassword');
+  }).catch(err => {
+
+    res.status(500).send('Error occurred while deleting category');
+  });
+
+});
+
 module.exports = router;

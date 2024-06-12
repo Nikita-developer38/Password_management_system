@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 mongoose.connect('mongodb+srv://nikitamurmure3835:nikita%40123@cluster0.tt9hzse.mongodb.net/passwordManagement?retryWrites=true&w=majority ');
 
 
+
 var conn = mongoose.collection;
 var passwordCategorySchema = new mongoose.Schema({
     password_category: {
