@@ -17,11 +17,6 @@ To install and set up the Password Management System, follow these steps:
    
 2. **Run command**:
    ```bash
-   PS : > cd pms
-   PS : > node index.js
+    cd pms
+    node index.js
    
-   
-
-   
-
-  
