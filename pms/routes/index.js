@@ -255,10 +255,126 @@ router.post('/addNewPassword', checkloginuser, function (req, res, next) {
 });
 
 //your code
+// router.get('/viewAllPassword', checkloginuser, function (req, res, next) {
+//   var loginUser = localStorage.getItem('loginUser');
+//   var perPage = 2;
+//   var page = req.params.page || 1;
+
+
+
+//   addPassModel.find({}).skip((perPage * page) - perPage)
+//     .limit(perPage).exec().then(data => {
+//       addPassModel.countDocuments({}).exec().then(count => {
+//         res.render('viewAllPassword', {
+//           title: 'Password Management System',
+//           loginUser: loginUser,
+//           success: '',
+//           errors: '',
+
+//           records: data,
+//           current: page,
+//           pages: Math.ceil(count / perPage)
+
+
+//         });
+
+
+//       });
+//     }).catch(err => {
+
+//       res.status(500).send('Error occurred while fetching categories');
+//     });
+
+// });
+
+
+// router.get('/viewAllPassword/:page', checkloginuser, function (req, res, next) {
+//   var loginUser = localStorage.getItem('loginUser');
+//   var perPage = 2;
+//   var page = 1;
+
+
+
+//   addPassModel.find({}).skip((perPage * page) - perPage)
+//     .limit(perPage).exec().then(data => {
+//       addPassModel.countDocuments({}).exec().then(count => {
+//         res.render('viewAllPassword', {
+//           title: 'Password Management System',
+//           loginUser: loginUser,
+//           success: '',
+//           errors: '',
+
+//           records: data,
+//           current: page,
+//           pages: Math.ceil(count / perPage)
+
+
+//         });
+
+
+//       });
+//     }).catch(err => {
+
+//       res.status(500).send('Error occurred while fetching categories');
+//     });
+
+// });
+
 router.get('/viewAllPassword', checkloginuser, function (req, res, next) {
+  try {
+    var loginUser = localStorage.getItem('loginUser');
+
+
+    var options = {
+
+      offset: 1,
+      limit: 1
+    };
+
+    addPassModel.paginate({}, options).then(function (result) {
+      res.render('viewAllPassword', {
+        title: 'Password Management System',
+        loginUser: loginUser,
+        success: '',
+        errors: '',
+
+        records: result,
+
+
+      });
+
+
+    });
+  
+ 
+catch (err) {
+      next(err)
+
+    }
+  });
+
+
+router.get('/viewAllPassword/:page', checkloginuser, function (req, res, next) {
   var loginUser = localStorage.getItem('loginUser');
-  addPassModel.find().exec().then(data => {
-    res.render('viewAllPassword', { title: 'Password Management System', loginUser: loginUser, records: data, success: '', errors: '' });
+  var options = {
+
+    offset: 1,
+    limit: 1
+  };
+
+  addPassModel.paginate({}, options).then(function (result) {
+    res.render('viewAllPassword', {
+      title: 'Password Management System',
+      loginUser: loginUser,
+      success: '',
+      errors: '',
+
+      records: result.docs,
+      current: result.offset,
+      pages: (result.total)
+
+
+    });
   }).catch(err => {
 
     res.status(500).send('Error occurred while fetching categories');
@@ -284,7 +400,9 @@ router.get('/viewAllPassword/edit/:id', checkloginuser, function (req, res, next
   var passcat_id = req.params.id;
 
   addPassModel.findById(passcat_id).exec().then(data => {
-    res.render('edit_pass_details', { title: 'password Management System ', loginUser: loginUser, errors: '', success: '', records: data, id: passcat_id });
+    addPassModel.find().exec().then(data1 => {
+      res.render('edit_pass_details', { title: 'password Management System ', loginUser: loginUser, errors: '', success: '', record: data1, records: data, id: passcat_id });
+    });
   }).catch(err => {
 
     res.status(500).send('Error occurred while deleting category');
@@ -297,7 +415,8 @@ router.post('/viewAllPassword/edit/', checkloginuser, function (req, res, next) 
   var passcat_id = req.body.id;
   var passcat_category = req.body.pass_cat;
   var passcat_details = req.body.password_detail;
-  passCatModel.findByIdAndUpdate(passcat_id, { password_category: passcat_category }, { password_Details: passcat_details }).exec().then(data => {
+  var project_name = req.body.Project_Name;
+  passCatModel.findByIdAndUpdate(passcat_id, { password_category: passcat_category }, { project_name: project_name }, { password_Details: passcat_details }).exec().then(data => {
     res.redirect('/viewAllPassword');
   }).catch(err => {
 
