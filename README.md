@@ -16,6 +16,7 @@ To install and set up the Password Management System, follow these steps:
    git clone https://github.com/Nikita-developer38/Password_manage/
    
 2. **Run command**:
+   ```bash
    PS : > cd pms
    PS : > node index.js
    
