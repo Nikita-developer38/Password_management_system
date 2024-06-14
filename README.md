@@ -13,7 +13,7 @@ To install and set up the Password Management System, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/Nikita-developer38/Password_manage/
+   git clone https://github.com/Nikita-developer38/Password_management_system/
    
 2. **Run command**:
    ```bash
