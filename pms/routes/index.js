@@ -345,42 +345,49 @@ router.get('/viewAllPassword', checkloginuser, function (req, res, next) {
 
 
     });
-  
- 
-catch (err) {
-      next(err)
 
-    }
-  });
+  }
+
+  catch (err) {
+    next(err)
+
+  }
+});
 
 
 router.get('/viewAllPassword/:page', checkloginuser, function (req, res, next) {
-  var loginUser = localStorage.getItem('loginUser');
-  var options = {
+  try {
+    var loginUser = localStorage.getItem('loginUser');
+    var options = {
 
-    offset: 1,
-    limit: 1
+      offset: 1,
+      limit: 1
+    };
+
+    addPassModel.paginate({}, options).then(function (result) {
+      res.render('viewAllPassword', {
+        title: 'Password Management System',
+        loginUser: loginUser,
+        success: '',
+        errors: '',
+
+        records: result.docs,
+        current: result.offset,
+        pages: (result.total)
+
+
+      });
+
+    })
+  }
+
+  catch (err) {
+
+    next(err);
   };
 
-  addPassModel.paginate({}, options).then(function (result) {
-    res.render('viewAllPassword', {
-      title: 'Password Management System',
-      loginUser: loginUser,
-      success: '',
-      errors: '',
-
-      records: result.docs,
-      current: result.offset,
-      pages: (result.total)
-
-
-    });
-  }).catch(err => {
-
-    res.status(500).send('Error occurred while fetching categories');
-  });
-
 });
+
 
 
 router.get('/viewAllPassword/delete/:id', checkloginuser, function (req, res, next) {
